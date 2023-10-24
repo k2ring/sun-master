@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+	PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="mapper.order">
+	<!-- 리절트 맵 정의 -->
+	<resultMap id="orderGoodsResult" type="OrderVO">
+		<result property="order_seq_num" column="order_seq_num" />
+		<result property="order_id" column="order_id" />
+		<result property="goods_id" column="goods_id" />
+		<result property="goods_title" column="goods_title" />
+		<result property="goods_price" column="goods_price" />
+		<result property="goods_fileName" column="goods_fileName" />
+		<result property="goods_qty" column="goods_qty" />
+		<result property="delivery_state" column="delivery_state" />
+
+		<result property="member_id" column="member_id" />
+		<result property="orderer_hp" column="orderer_hp" />
+
+		<result property="receiver_name" column="receiver_name" />
+		<result property="receiver_hp1" column="receiver_hp1" />
+		<result property="delivery_address" column="delivery_address" />
+
+		<result property="pay_method" column="pay_method" />
+		<result property="card_com_name" column="card_com_name" />
+		<result property="pay_orderer_hp_num"
+			column="pay_orderer_hp_num" />
+		<result property="card_pay_month" column="card_pay_month" />
+		<result property="pay_order_time" column="pay_order_time" />
+	</resultMap>
+
+
+
+	<!-- 주문하기 -->
+	<insert id="insertNewOrder" parameterType="orderVO">
+		<selectKey resultType="int" keyProperty="order_seq_num"
+			order="BEFORE">
+			select order_seq_num.nextval from dual
+		</selectKey>
+	    <![CDATA[
+			insert into t_shopping_order(order_seq_num,
+			                            order_id,
+									    goods_id,
+									    goods_title,
+									    goods_price,
+									    goods_fileName,
+									    order_goods_qty,
+									    delivery_state,
+										member_id,
+						                orderer_hp,
+									    receiver_name,
+									    receiver_hp1,
+					                    delivery_address,
+					                    pay_method,
+						                card_com_name,
+						                card_pay_month,
+						                pay_orderer_hp_num)
+							     values(#{order_seq_num},
+							            #{order_id},
+									    #{goods_id},
+									    #{goods_title},
+									    #{goods_price},
+									    #{goods_fileName},
+									    #{order_goods_qty},
+									    #{delivery_state},
+									    #{member_id},
+						                #{orderer_hp},
+						                #{receiver_name},
+						                #{receiver_hp1},
+					                    #{delivery_address},
+					                    #{pay_method},
+						                #{card_com_name},
+						                #{card_pay_month},
+						                #{pay_orderer_hp_num})
+    	]]>
+	</insert>
+	
+	
+
+	<!-- 주문번호 시퀀스를 생성 -->
+	<!-- 주문번호 시퀀스를 생성하여 결과값을 반환한다. -->
+	<select id="selectOrderID" resultType="int">
+	    <![CDATA[
+		    select seq_order_id.nextval from dual
+    	]]>
+	</select>
+	
+	
+
+
+	<!-- 주문완료시 장바구니에서 상품 제거 -->
+	<delete id="deleteGoodsFromCart" parameterType="orderVO">
+		  <![CDATA[
+			  delete from t_shopping_cart where goods_id= #{goods_id}
+		  ]]>
+	</delete>
+	
+	
+
+</mapper>

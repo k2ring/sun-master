@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+	PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="mapper.goods">
+	<!-- 리절트 맵 정의 -->
+	<resultMap id="goodsResult" type="goodsVO">
+		<result property="goods_id" column="goods_id" />
+		<result property="goods_title" column="goods_title" />
+		<result property="goods_status" column="goods_status" />
+		<result property="goods_price" column="goods_price" />
+		<result property="goods_delivery_price"
+			column="goods_delivery_price" />
+		<result property="goods_delivery_date"
+			column="goods_delivery_date" />
+		<result property="goods_fileName" column="fileName" />
+		<result property="goods_sort" column="goods_sort" />
+	</resultMap>
+
+	<resultMap id="imageResult" type="ImageFileVO">
+		<result property="goods_id" column="goods_id" />
+		<result property="fileName" column="fileName" />
+		<result property="reg_id" column="reg_id" />
+		<result property="image_id" column="image_id" />
+		<result property="fileType" column="fileType" />
+	</resultMap>
+
+
+
+	<!-- 메인페이지 - 지정 status별, 메뉴별 -->
+	<!-- goodsStatus이 bestseller인 상품정보와 그 id값에 맞는 main_image를 goods_creDate 
+		desc내림차순으로 가져온다. -->
+	<select id="selectGoodsList" parameterType="String"
+		resultMap="goodsResult">
+        <![CDATA[
+         select DISTINCT t.*
+          from(
+			select g.*,d.fileName from t_shopping_goods g, t_goods_detail_image d
+        	where g.goods_id=d.goods_id 
+        	and d.filetype='main_image'
+        	and goods_status=#{goodsStatus}
+            order by g.goods_creDate desc)  t
+	    ]]>
+	</select>
+
+
+
+	<!-- 메인페이지 - 지정 메뉴별, 메뉴별 -->
+	<!-- goods_sort가 #{goodsSort}인 상품정보와 그 id값에 맞는 main_image를 goods_creDate 
+		desc내림차순으로 가져온다. -->
+	<select id="selectMenusList" parameterType="String"
+		resultMap="goodsResult">
+        <![CDATA[
+         select DISTINCT t.*
+          from(
+          select g.*,d.fileName from t_shopping_goods g, t_goods_detail_image d
+          where g.goods_id=d.goods_id 
+          and d.filetype='main_image'
+          and goods_sort=#{goodsSort}
+          order by g.goods_creDate desc)  t
+	    ]]>
+	</select>
+
+
+
+	<!-- header 카테고리별 -->
+	<!-- t_shopping_goods에서 #{menuGoods}가 들어간 상품의 goods_title과 main_image를 goods_creDate 
+		desc내림차순으로 가져온다. -->
+	<select id="selectGoodsByMenuGoods" resultMap="goodsResult"
+		parameterType="String">
+     <![CDATA[
+				select g.*,d.fileName from t_shopping_goods g, t_goods_detail_image d
+		    where g.goods_id=d.goods_id
+		    and d.filetype='main_image'
+		    and g.goods_sort like '%'|| #{menuGoods} || '%'
+		    order by g.goods_creDate desc
+		]]>
+	</select>
+
+
+
+
+	<!-- 추천키워드 -->
+	<!-- t_shopping_goods에서 #{keyword}가 들어간 상품의 goods_title를 goods_creDate desc내림차순으로 
+		가져온다. -->
+	<select id="selectKeywordSearch" resultType="String"
+		parameterType="String">
+	    <![CDATA[
+        select goods_title from t_shopping_goods 
+        where         
+        goods_title like '%'|| #{keyword} || '%'
+        order by goods_creDate desc
+		]]>
+	</select>
+
+
+	<!-- 검색 -->
+	<!-- t_shopping_goods에서 #{searchWord}가 들어간 상품의 goods_title과 main_image를 
+		goods_creDate desc내림차순으로 가져온다. -->
+	<select id="selectGoodsBySearchWord" resultMap="goodsResult"
+		parameterType="String">
+     <![CDATA[
+				select g.*,d.fileName from t_shopping_goods g, t_goods_detail_image d
+		    where g.goods_id=d.goods_id
+		    and d.filetype='main_image'
+		    and g.goods_title like '%'|| #{searchWord} || '%'
+		    order by g.goods_creDate desc
+		]]>
+	</select>
+
+
+
+	<!-- 상품상세 - 상품상세정보 추출 -->
+	<!-- goods_id에 맞는 상품정보와 main_image를 가져온다. -->
+	<select id="selectGoodsDetail" resultMap="goodsResult"
+		parameterType="String">
+	    <![CDATA[
+		     select DISTINCT g.*,d.fileName from t_shopping_goods g, t_goods_detail_image d
+	        where g.goods_id=d.goods_id
+	        and d.filetype='main_image'
+	        and g.goods_id=#{goods_id}
+	        order by g.goods_id
+    	]]>
+	</select>
+
+
+
+	<!-- 상품상세 - 상세이미지 추출 -->
+	<!-- 상품상세, goods_id가 일치하는 fileType이 main_image이 아닌 모든이미지(상세이미지 리스트) 리스트를 
+		가져온다. -->
+	<select id="selectGoodsDetailImage" resultMap="imageResult"
+		parameterType="String">
+	    <![CDATA[
+		    	select * from  t_goods_detail_image 
+		    	where fileType!='main_image'
+				and goods_id=#{goods_id}
+    	]]>
+	</select>
+
+
+</mapper>

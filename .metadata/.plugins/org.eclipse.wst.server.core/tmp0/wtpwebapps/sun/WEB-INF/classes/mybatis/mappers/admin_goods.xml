@@ -1,0 +1,178 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+	PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="mapper.admin.goods">
+	<!-- 리절트 맵 정의 -->
+	<resultMap id="goodsResult" type="goodsVO">
+		<result property="goods_id" column="goods_id" />
+		<result property="goods_title" column="goods_title" />
+
+		<result property="goods_status" column="goods_status" />
+		<result property="goods_price" column="goods_price" />
+		<result property="goods_delivery_price"
+			column="goods_delivery_price" />
+		<result property="goods_delivery_date"
+			column="goods_delivery_date" />
+
+		<result property="goods_fileName" column="fileName" />
+		<result property="goods_sort" column="goods_sort" />
+	</resultMap>
+
+	<resultMap id="imageResult" type="ImageFileVO">
+		<result property="goods_id" column="goods_id" />
+		<result property="fileName" column="fileName" />
+		<result property="reg_id" column="reg_id" />
+		<result property="image_id" column="image_id" />
+		<result property="fileType" column="fileType" />
+	</resultMap>
+
+	<resultMap id="orderGoodsResult" type="OrderVO">
+		<result property="order_id" column="order_id" />
+		<result property="member_id" column="member_id" />
+		<result property="goods_id" column="goods_id" />
+		<result property="goods_title" column="goods_title" />
+		<result property="goods_price" column="goods_price" />
+		<result property="order_total_price" column="order_total_price" />
+		<result property="order_goods_qty" column="order_goods_qty" />
+
+		<result property="orderer_name" column="orderer_name" />
+		<result property="receiver_name" column="receiver_name" />
+		<result property="receiver_hp1" column="receiver_hp1" />
+
+		<result property="delivery_address" column="delivery_address" />
+		<result property="pay_method" column="pay_method" />
+		<result property="card_com_name" column="card_com_name" />
+		<result property="card_pay_month" column="card_pay_month" />
+
+		<result property="pay_orderer_hp_num"
+			column="pay_orderer_hp_num" />
+		<result property="pay_order_time" column="pay_order_time" />
+		<result property="delivery_state" column="delivery_state" />
+		<result property="final_total_price" column="final_total_price" />
+		<result property="goods_qty" column="goods_qty" />
+		<result property="goods_fileName" column="goods_fileName" />
+	</resultMap>
+
+
+
+
+	<!-- 상품관리 - 상품리스트 -->
+	<select id="selectNewGoodsList" resultMap="goodsResult"
+		parameterType="java.util.Map">
+	    <![CDATA[
+		select a.*, rownum as rnum from(select * 
+		from t_shopping_goods 
+        where  to_char(goods_credate,'yyyy-mm-dd')  
+        between #{beginDate} and #{endDate}
+		order by goods_credate desc) a  
+    	]]>
+	</select>
+	<!-- 페이징 삭제 -->
+	<!-- where rownum >=1 and rownum <=10 -->
+
+
+
+	<!-- 상품추가 - 상품정보 -->
+	<insert id="insertNewGoods" parameterType="java.util.Map">
+		<selectKey resultType="String" keyProperty="goods_id"
+			order="BEFORE">
+			select seq_goods_id.nextval from dual
+		</selectKey>
+	    <![CDATA[
+		   insert into t_shopping_goods(
+		                goods_id, 
+		                goods_sort,
+                    	goods_title,
+						goods_price)
+					  			values(
+					  			      #{goods_id},
+					  			      #{goods_sort},
+					  			      #{goods_title},
+					  			      #{goods_price}
+					 			 )
+		]]>
+	</insert>
+
+
+
+
+
+	<!-- 상품추가 - 이미지 -->
+	<insert id="insertGoodsImageFile" parameterType="imageFileVO">
+		<selectKey resultType="int" keyProperty="image_id"
+			order="BEFORE">
+			select seq_image_id.nextval from dual
+		</selectKey>
+	    <![CDATA[
+		   insert into t_goods_detail_image (image_id,
+		                                     goods_id,
+											fileName,
+											fileType,
+											reg_id)
+											 values(#{image_id},
+											   		#{goods_id},
+											   		#{fileName},
+											   		#{fileType},
+											   		#{reg_id} )
+		]]>
+	</insert>
+
+
+
+
+
+	<!-- 상품삭제 - 상품정보 삭제 -->
+	<delete id="deleteGoods" parameterType="String">
+	    <![CDATA[
+	    delete from t_shopping_goods where goods_id = #{goods_id}    
+    	]]>
+	</delete>
+
+
+
+
+	<!-- 상품삭제 - 이미지 삭제 -->
+	<delete id="deleteimages" parameterType="String">
+	    <![CDATA[   
+		delete from t_goods_detail_image where goods_id = #{goods_id}
+    	]]>
+	</delete>
+
+
+
+
+	<!-- 상품수정 - 상품정보 -->
+	<update id="modifyGoods" parameterType="java.util.Map">
+
+	    <![CDATA[
+		   update t_shopping_goods
+			set
+		                goods_sort = #{goods_sort},
+                    	goods_title = #{goods_title},
+						goods_price = #{goods_price}
+			where
+			goods_id= #{goods_id} 						
+					  			
+		]]>
+	</update>
+
+
+
+
+
+	<!-- 상품수정 - 이미지 -->
+	<update id="modifyimages" parameterType="imageFileVO">
+	    <![CDATA[
+		   update t_goods_detail_image
+			set					
+						fileType = #{fileType}
+			where
+			goods_id= #{goods_id} 
+			and fileName = #{fileName}
+		]]>
+	</update>
+
+</mapper>
+

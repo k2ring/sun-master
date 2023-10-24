@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+	PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="mapper.cart">
+	<!-- 리절트 맵 정의 -->
+	<resultMap id="cartResult" type="CartVO">
+		<result property="member_id" column="member_id" />
+		<result property="goods_id" column="goods_id" />
+		<result property="cart_id" column="cart_id" />
+		<result property="cart_goods_qty" column="cart_goods_qty" />
+		<result property="creDate" column="creDate" />
+	</resultMap>
+
+	<resultMap id="goodsResult" type="GoodsVO">
+		<result property="goods_id" column="goods_id" />
+		<result property="goods_title" column="goods_title" />
+		<result property="goods_status" column="goods_status" />
+		<result property="goods_price" column="goods_price" />
+
+		<result property="goods_delivery_price"
+			column="goods_delivery_price" />
+		<result property="goods_delivery_date"
+			column="goods_delivery_date" />
+
+		<result property="goods_fileName" column="fileName" />
+		<result property="goods_sort" column="goods_sort" />
+		<result property="goods_contents_order"
+			column="goods_contents_order" />
+	</resultMap>
+
+
+	<!-- 장바구니 - 장바구니 리스트 credate desc순으로 가져옴 -->
+	<select id="selectCartList" parameterType="cartVO"
+		resultMap="cartResult">
+	    <![CDATA[
+		select cart_id, goods_id, member_id, cart_goods_qty, creDate 
+		from t_shopping_cart 
+		where member_id=#{member_id} 
+		ORDER BY credate desc
+		]]>
+	</select>
+
+	<!-- 장바구니 - 상품 리스트, goods_id에 맞는 정보를 가져옴 -->
+	<select id="selectGoodsList" resultMap="goodsResult"
+		parameterType="java.util.Map">
+      <![CDATA[
+        select g.*,d.fileName from t_shopping_goods g, t_goods_detail_image d
+          where g.goods_id=d.goods_id
+          and d.filetype='main_image'
+           and g.goods_id in
+      ]]>
+		<foreach item="item" collection="list" open="(" separator=","
+			close=")">
+			#{item.goods_id}
+		</foreach>
+
+
+	</select>
+
+
+
+
+	<!-- 장바구니 추가 -->
+	<!-- 상품존재여부를 확인해 false, true로 반환한다. -->
+	<select id="selectCountInCart" resultType="String"
+		parameterType="cartVO">
+	    <![CDATA[
+		    select decode(count(*), 0, 'false', 'true') from t_shopping_cart
+			where goods_id=#{goods_id}
+			  and member_id=#{member_id} 
+    	]]>
+	</select>
+
+	<!-- cart번호를 부여하기 위한 과정, 카트번호 최댓값에서 +1해 부여한다. -->
+	<select id="selectMaxCartId" resultType="int">
+	    <![CDATA[
+			select nvl(max(cart_id), 0) + 1 from t_shopping_cart 
+    	]]>
+	</select>
+	<!-- 장바구니 추가 -->
+	<insert id="insertGoodsInCart" parameterType="cartVO">
+	    <![CDATA[
+		    	insert into t_shopping_cart(cart_id,
+		    	                           goods_id,
+		    	                           member_id,
+		    	                           cart_goods_qty)
+		        				 values(#{cart_id},
+    							        #{goods_id},
+    							        #{member_id},
+    							        1)
+    	]]>
+	</insert>
+
+
+
+
+	<!-- 장바구니 삭제 -->
+	<delete id="deleteCartGoods" parameterType="int">
+	    <![CDATA[
+	      delete from t_shopping_cart
+	      where cart_id=#{cart_id}
+    	]]>
+	</delete>
+
+
+
+	<!-- 장바구니 수정, 갯수만을 수정할 수 있다. -->
+	<update id="updateCartGoodsQty" parameterType="cartVO">
+	    <![CDATA[
+			update t_shopping_cart
+			       set cart_goods_qty=#{cart_goods_qty}
+		 	       where member_id=#{member_id}
+			        and goods_id=#{goods_id}
+    	]]>
+	</update>
+
+</mapper>

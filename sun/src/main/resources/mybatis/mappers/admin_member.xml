@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+	PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="mapper.admin.member">
+<resultMap id="memberResult" type="MemberVO">
+		<result property="member_name" column="member_name" />
+		<result property="member_id" column="member_id" />
+		<result property="member_pw" column="member_pw" />
+		<result property="hp1" column="hp1" />
+		<result property="zipcode" column="zipcode" />
+		<result property="member_address" column="member_address" />
+		<result property="subaddress" column="subaddress" />
+		<result property="sun_money" column="sun_money" />
+		<result property="joinDate" column="joinDate" />
+		<result property="del_yn" column="del_yn" />
+	</resultMap>
+	
+	<!-- 회원관리 -->
+	<!-- rownum을 부여하여 리스트 수를 표시할 수 있도록 함. -->
+	<!-- to_char로 출력되는 날짜형식을 변경했다. -->
+	<!-- beginDate~endDate 기간에 맞는 회원리스트를  joindate 오른차순으로 출력-->
+	<select id="listMember" resultMap="memberResult"   parameterType="java.util.HashMap"  >
+	    <![CDATA[
+		 select a.*, rownum as rnum from
+        (select member_name,member_id,member_pw, hp1, zipcode, member_address, subaddress, sun_money, del_yn, to_char(joindate,'YYYY-MM-DD') as joindate 
+		from t_shopping_member 
+		where  to_char(joindate,'yyyy-mm-dd')  between #{beginDate} and #{endDate}
+		order by joindate asc) a
+		]]>	        
+	</select>
+	
+</mapper>
+
